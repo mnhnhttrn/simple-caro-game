@@ -1,100 +1,126 @@
 // Source tham khảo "React tutorial": https://reactjs.org/tutorial/tutorial.html
 import React from 'react'
+import Board from './Board'
 import './Caro.css'
 
 
-function Square(props) {
-    return (
-        <button className={props.className} onClick={props.onClick}>
-            {props.value}
-        </button>
-    );
+function getHoriziontalLine(squares, pos) {
+    const line = [];
+    const h = Math.floor(pos / 20)
+    for (let i = 0; i < 19; i += 1) {
+        line.push({ val: squares[h * 20 + i], p: h * 20 + i })
+    }
+    return line
 }
 
-
-function HeadColSquare(props) {
-    return (
-        <div className="head-col-square">
-            {props.value}
-        </div>
-    );
+function getVerticalLine(squares, pos) {
+    const line = [];
+    const v = pos % 20
+    for (let i = 0; i < 19; i += 1) {
+        line.push({ val: squares[i * 20 + v], p: i * 20 + v })
+    }
+    return line
 }
 
-function HeadRowSquare(props) {
-    return (
-        <div className="head-row-square">
-            {props.value}
-        </div>
-    );
+function getSemiCross(squares, pos) {
+    // Get semi-cross
+    const line = [];
+    let h = Math.floor(pos / 20);
+    let v = pos % 20;
+    h -= 1;
+    v -= 1;
+    while (h > -1 && v > -1) {
+        // let str = "get point: (" +  h + " - " + v + "): " + (h*20+v)
+        // console.log(str)
+        line.unshift({ val: squares[h * 20 + v], p: h * 20 + v })
+        h -= 1;
+        v -= 1;
+    }
+    // console.log("pushing :" +(squares[pos]));
+    line.push({ val: squares[pos], p: pos })
+    h = Math.floor(pos / 20);
+    v = pos % 20;
+    h += 1;
+    v += 1;
+    while (h < 20 && v < 20) {
+        // let str = "get point: (" +  h + " - " + v + "): " + (h*20+v)
+        // console.log(str)
+        line.push({ val: squares[h * 20 + v], p: h * 20 + v })
+        h += 1;
+        v += 1;
+    }
+    // console.log("semi cross: " + line)
+    return line;
 }
 
-class Board extends React.Component {
-    renderSquare(i) {
-        if (this.props.winLine.indexOf(i) > -1) {
-            return (
-                <Square
-                    key={i}
-                    value={this.props.squares[i]}
-                    onClick={() => this.props.onClick(i)}
-                    className="square win-square"
-                />
-            );
+function getMainCross(squares, pos) {
+    // Get semi-cross
+    const line = [];
+    let h = Math.floor(pos / 20);
+    let v = pos % 20;
+    h -= 1;
+    v += 1;
+    while (h > -1 && v < 20) {
+        // let str = "get point: (" +  h + " - " + v + "): " + (h*20+v)
+        // console.log(str)
+        line.unshift({ val: squares[h * 20 + v], p: h * 20 + v })
+        h -= 1;
+        v += 1;
+    }
+    // console.log("pushing :" +(squares[pos]));
+    line.push({ val: squares[pos], p: pos })
+    h = Math.floor(pos / 20);
+    v = pos % 20;
+    h += 1;
+    v -= 1;
+    while (h < 20 && v > -1) {
+        // let str = "get point: (" +  h + " - " + v + "): " + (h*20+v)
+        // console.log(str)
+        line.push({ val: squares[h * 20 + v], p: h * 20 + v })
+        h += 1;
+        v -= 1;
+    }
+    // console.log("main cross: " + line)
+    return line;
+}
+
+function ruleCheck(line, xIsNext) {
+    const player = xIsNext ? 'X' : 'O';
+    const op = !xIsNext ? 'X' : 'O';
+    const win = 5;
+    let count = 0;
+    for (let i = 0; i < line.length; i += 1) {
+        if (line[i].val === player) {
+            count += 1
+        } else {
+            count = 0
         }
-        return (
-            <Square
-                key={i}
-                value={this.props.squares[i]}
-                onClick={() => this.props.onClick(i)}
-                className="square"
-            />
-        );
-    }
-
-    renderHeadColSquare(i) {
-        return (
-            <HeadColSquare
-                value={i} />
-        );
-    }
-
-    renderHeadRowSquare(i) {
-        return (
-            <HeadRowSquare
-                value={i} />
-        );
-    }
-
-    renderRow(r) {
-        let squares = [];
-        for (let j = 0; j < 20; j++) {
-            if (r === -1) {
-                squares.push(this.renderHeadColSquare(j))
-            } else {
-                squares.push(this.renderSquare(r * 20 + j))
+        if (count === win) {
+            if (i - count === -1 && line[i + 1].val === op) { return null }
+            if (i + 1 === 20 && line[i - count].val === op) { return null }
+            if (line[i - count].val === op && line[i + 1].val === op) { return null }
+            // this.setState({winLine:line.slice(i-count,i+1)})
+            // return player;
+            const wl = []
+            for (let j = i + 1 - count; j < i + 1; j += 1) {
+                wl.push(line[j].p)
             }
+            return wl
         }
-        if (r === -1) {
-            return (
-                <div className="board-row"><HeadRowSquare value={""} />{squares}</div>
-            );
-        }
-        return (
-            <div className="board-row"><HeadRowSquare value={r} />{squares}</div>
-        );
     }
+    return null;
+}
 
-    render() {
 
-        let rows = [];
-        for (let i = -1; i < 20; i++) {
-            rows.push(this.renderRow(i))
-        }
-        return (
-            <div>
-                {rows}
-            </div>
-        );
+function calculateWinner(squares, pos, xIsNext) {
+    if (pos === -1) {
+        return null;
     }
+    const hline = getHoriziontalLine(squares, pos)
+    const vline = getVerticalLine(squares, pos)
+    const semiCross = getSemiCross(squares, pos)
+    const mainCross = getMainCross(squares, pos)
+    return ruleCheck(hline, xIsNext) || ruleCheck(vline, xIsNext) || ruleCheck(semiCross, xIsNext) || ruleCheck(mainCross, xIsNext)
 }
 
 class Caro extends React.Component {
@@ -105,7 +131,6 @@ class Caro extends React.Component {
                 squares: Array(400).fill(null),
                 historyPos: -1
             }],
-            screenHeight: window.innerHeight,
             screenWidth: window.innerWidth,
             xIsNext: true,
             isDone: false,
@@ -119,28 +144,28 @@ class Caro extends React.Component {
 
     onUpdateScreen = () => {
         this.setState({
-            screenHeight: window.innerHeight,
             screenWidth: window.innerWidth
         });
     };
 
     handleClick(i) {
-        const history = this.state.history.slice(0, this.state.stepNumber + 1);
+        let { history } = this.state
+        const { stepNumber, xIsNext, isDone } = this.state
+        history = history.slice(0, stepNumber + 1);
         const current = history[history.length - 1];
-        this.setState({ pos: i });
         const squares = current.squares.slice();
-        if (squares[i] || this.state.isDone) {
+        if (squares[i] || isDone) {
             return;
         }
-        squares[i] = this.state.xIsNext ? 'X' : 'O';
+        squares[i] = xIsNext ? 'X' : 'O';
         this.setState({
-            xIsNext: !this.state.xIsNext,
-            history: history.concat([{ squares: squares, historyPos: i }]),
+            xIsNext: !xIsNext,
+            history: history.concat([{ squares, historyPos: i }]),
             stepNumber: history.length
         });
-        var l = calculateWinner(squares, i, this.state.xIsNext)
+        const l = calculateWinner(squares, i, xIsNext)
         if (l) {
-            //console.log(l)
+            // console.log(l)
             this.setState({ isDone: true, winLine: l })
         }
     }
@@ -166,43 +191,44 @@ class Caro extends React.Component {
     }
 
     changeListOrder() {
+        const { isStepListDesc } = this.state
         this.setState({
-            isStepListDesc: !this.state.isStepListDesc
-        }, () => { this.setState({ arrowSymbol: this.state.isStepListDesc ? '↑' : '↓' }) })
+            isStepListDesc: !isStepListDesc
+        }, () => { this.setState({ arrowSymbol: isStepListDesc ? '↑' : '↓' }) })
     }
 
     render() {
-        const history = this.state.history;
-        const current = history[this.state.stepNumber];
+        const { history, stepNumber, isDone, xIsNext, isStepListDesc, screenWidth, winLine } = this.state;
+        const current = history[stepNumber];
         let status;
-        if (this.state.isDone) {
-            let winner = !this.state.xIsNext ? 'X' : 'O';
-            status = winner + " CHIẾN THẮNG!!!";
+        if (isDone) {
+            const winner = !xIsNext ? 'X' : 'O';
+            status = `${winner} CHIẾN THẮNG!!!`;
         } else {
-            status = 'Đến lượt ' + (this.state.xIsNext ? 'X' : 'O');
+            status = `Đến lượt ${xIsNext ? 'X' : 'O'}`;
         }
 
-        const moves = (this.state.isStepListDesc ? history.slice(1).reverse() : history.slice(1)).map((step, move, arr) => {
+        const moves = (isStepListDesc ? history.slice(1).reverse() : history.slice(1)).map((step, move, arr) => {
             let idx = move + 1
-            if (this.state.isStepListDesc) {
+            if (isStepListDesc) {
                 idx = arr.length - move
             }
-            const desc = '#' + idx.toString().padEnd(10) + '(' + step.historyPos % 20 + '-' + Math.floor(step.historyPos / 20) + ')';
-            if (idx === this.state.stepNumber) {
+            const desc = `#${idx.toString().padEnd(10)}(${step.historyPos % 20}-${Math.floor(step.historyPos / 20)})`;
+            if (idx === stepNumber) {
                 return (
                     <li key={idx} className="selected-step">
-                        <button onClick={() => this.jumpTo(idx)}>{desc}</button>
+                        <button type="button" onClick={() => this.jumpTo(idx)}>{desc}</button>
                     </li>
                 );
             }
             return (
                 <li key={idx}>
-                    <button onClick={() => this.jumpTo(idx)}>{desc}</button>
+                    <button type="button" onClick={() => this.jumpTo(idx)}>{desc}</button>
                 </li>
             );
         });
 
-        if (this.state.screenWidth < 720) {
+        if (screenWidth < 720) {
             return (
                 <div className="status">Màn hình cần có chiều dài lớn 720px để có thể chơi được!</div>
             );
@@ -214,15 +240,15 @@ class Caro extends React.Component {
                     <Board
                         squares={current.squares}
                         onClick={i => this.handleClick(i)}
-                        winLine={this.state.winLine}
+                        winLine={winLine}
                     />
                 </div>
                 <div className="game-info">
                     <ol>
                         <div className="status">{status}</div>
                         <div>
-                            <button onClick={() => this.resetGame()} id="reset-btn">Chơi lại từ đầu</button>
-                            <br /><button onClick={() => this.changeListOrder()} id="change-order-btn">Nước đi (col-row)    {this.state.arrowSymbol}</button>
+                            <button type="button" onClick={() => this.resetGame()} id="reset-btn">Chơi lại từ đầu</button>
+                            <br /><button type="button" onClick={() => this.changeListOrder()} id="change-order-btn">Nước đi (col-row)    {this.state.arrowSymbol}</button>
                         </div>
                         {moves}
                     </ol>
@@ -230,125 +256,6 @@ class Caro extends React.Component {
             </div>
         );
     }
-}
-
-
-function calculateWinner(squares, pos, xIsNext) {
-    if (pos === -1) {
-        return null;
-    }
-    let hline = getHoriziontalLine(squares, pos)
-    let vline = getVerticalLine(squares, pos)
-    let semiCross = getSemiCross(squares, pos)
-    let mainCross = getMainCross(squares, pos)
-    return ruleCheck(hline, xIsNext) || ruleCheck(vline, xIsNext) || ruleCheck(semiCross, xIsNext) || ruleCheck(mainCross, xIsNext)
-}
-
-function ruleCheck(line, xIsNext) {
-    let player = xIsNext ? 'X' : 'O';
-    let op = !xIsNext ? 'X' : 'O';
-    const win = 5;
-    let count = 0;
-    for (let i = 0; i < line.length; i++) {
-        if (line[i].val === player) {
-            count++
-        } else {
-            count = 0
-        }
-        if (count === win) {
-            if (i - count === -1 && line[i + 1].val === op) { return null }
-            if (i + 1 === 20 && line[i - count].val === op) { return null }
-            if (line[i - count].val === op && line[i + 1].val === op) { return null }
-            // this.setState({winLine:line.slice(i-count,i+1)})
-            // return player;
-            let wl = []
-            for (let j = i + 1 - count; j < i + 1; j++) {
-                wl.push(line[j].p)
-            }
-            return wl
-        }
-    }
-    return null;
-}
-
-function getHoriziontalLine(squares, pos) {
-    let line = [];
-    let h = Math.floor(pos / 20)
-    for (let i = 0; i < 19; i++) {
-        line.push({ val: squares[h * 20 + i], p: h * 20 + i })
-    }
-    return line
-}
-
-function getVerticalLine(squares, pos) {
-    let line = [];
-    let v = pos % 20
-    for (let i = 0; i < 19; i++) {
-        line.push({ val: squares[i * 20 + v], p: i * 20 + v })
-    }
-    return line
-}
-
-function getSemiCross(squares, pos) {
-    //Get semi-cross
-    let line = [];
-    let h = Math.floor(pos / 20);
-    let v = pos % 20;
-    h--;
-    v--;
-    while (h > -1 && v > -1) {
-        //let str = "get point: (" +  h + " - " + v + "): " + (h*20+v)
-        //console.log(str)
-        line.unshift({ val: squares[h * 20 + v], p: h * 20 + v })
-        h--;
-        v--;
-    }
-    //console.log("pushing :" +(squares[pos]));
-    line.push({ val: squares[pos], p: pos })
-    h = Math.floor(pos / 20);
-    v = pos % 20;
-    h++;
-    v++;
-    while (h < 20 && v < 20) {
-        // let str = "get point: (" +  h + " - " + v + "): " + (h*20+v)
-        // console.log(str)
-        line.push({ val: squares[h * 20 + v], p: h * 20 + v })
-        h++;
-        v++;
-    }
-    // console.log("semi cross: " + line)
-    return line;
-}
-
-function getMainCross(squares, pos) {
-    //Get semi-cross
-    let line = [];
-    let h = Math.floor(pos / 20);
-    let v = pos % 20;
-    h--;
-    v++;
-    while (h > -1 && v < 20) {
-        // let str = "get point: (" +  h + " - " + v + "): " + (h*20+v)
-        // console.log(str)
-        line.unshift({ val: squares[h * 20 + v], p: h * 20 + v })
-        h--;
-        v++;
-    }
-    // console.log("pushing :" +(squares[pos]));
-    line.push({ val: squares[pos], p: pos })
-    h = Math.floor(pos / 20);
-    v = pos % 20;
-    h++;
-    v--;
-    while (h < 20 && v > -1) {
-        // let str = "get point: (" +  h + " - " + v + "): " + (h*20+v)
-        // console.log(str)
-        line.push({ val: squares[h * 20 + v], p: h * 20 + v })
-        h++;
-        v--;
-    }
-    // console.log("main cross: " + line)
-    return line;
 }
 
 export default Caro
