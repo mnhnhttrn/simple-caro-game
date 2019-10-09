@@ -9,7 +9,6 @@ function Square(props) {
     );
 }
 
-
 function HeadColSquare(props) {
     const { value } = props
     return (

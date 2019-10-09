@@ -1,7 +1,9 @@
 // Source tham khảo "React tutorial": https://reactjs.org/tutorial/tutorial.html
 import React from 'react'
+import { connect } from 'react-redux'
 import Board from './Board'
 import './Caro.css'
+import * as actions from '../actions'
 
 
 function getHoriziontalLine(squares, pos) {
@@ -99,8 +101,6 @@ function ruleCheck(line, xIsNext) {
             if (i - count === -1 && line[i + 1].val === op) { return null }
             if (i + 1 === 20 && line[i - count].val === op) { return null }
             if (line[i - count].val === op && line[i + 1].val === op) { return null }
-            // this.setState({winLine:line.slice(i-count,i+1)})
-            // return player;
             const wl = []
             for (let j = i + 1 - count; j < i + 1; j += 1) {
                 wl.push(line[j].p)
@@ -110,7 +110,6 @@ function ruleCheck(line, xIsNext) {
     }
     return null;
 }
-
 
 function calculateWinner(squares, pos, xIsNext) {
     if (pos === -1) {
@@ -124,33 +123,11 @@ function calculateWinner(squares, pos, xIsNext) {
 }
 
 class Caro extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            history: [{
-                squares: Array(400).fill(null),
-                historyPos: -1
-            }],
-            screenWidth: window.innerWidth,
-            xIsNext: true,
-            isDone: false,
-            stepNumber: 0,
-            isStepListDesc: false,
-            arrowSymbol: '↓',
-            winLine: Array(5).fill(null)
-        };
-        window.addEventListener("resize", this.onUpdateScreen);
-    }
-
-    onUpdateScreen = () => {
-        this.setState({
-            screenWidth: window.innerWidth
-        });
-    };
 
     handleClick(i) {
-        let { history } = this.state
-        const { stepNumber, xIsNext, isDone } = this.state
+        const { caroState, playerMove, haveWinner } = this.props
+        let { history } = caroState
+        const { stepNumber, xIsNext, isDone } = caroState
         history = history.slice(0, stepNumber + 1);
         const current = history[history.length - 1];
         const squares = current.squares.slice();
@@ -158,47 +135,17 @@ class Caro extends React.Component {
             return;
         }
         squares[i] = xIsNext ? 'X' : 'O';
-        this.setState({
-            xIsNext: !xIsNext,
-            history: history.concat([{ squares, historyPos: i }]),
-            stepNumber: history.length
-        });
+        playerMove(i, squares)
         const l = calculateWinner(squares, i, xIsNext)
         if (l) {
-            // console.log(l)
-            this.setState({ isDone: true, winLine: l })
+            haveWinner(l)
         }
     }
 
-    resetGame() {
-        this.setState({
-            history: [{
-                squares: Array(400).fill(null),
-                historyPos: -1
-            }],
-            xIsNext: true,
-            isDone: false,
-            stepNumber: 0,
-            winLine: Array(5).fill(null)
-        });
-    }
-
-    jumpTo(step) {
-        this.setState({
-            stepNumber: step,
-            xIsNext: (step % 2) === 0
-        });
-    }
-
-    changeListOrder() {
-        const { isStepListDesc } = this.state
-        this.setState({
-            isStepListDesc: !isStepListDesc
-        }, () => { this.setState({ arrowSymbol: isStepListDesc ? '↑' : '↓' }) })
-    }
-
     render() {
-        const { history, stepNumber, isDone, xIsNext, isStepListDesc, screenWidth, winLine } = this.state;
+        const { resetGame, changeListOrder, jumpTo } = this.props
+        const { caroState } = this.props;
+        const { history, stepNumber, isDone, xIsNext, isStepListDesc, winLine } = caroState;
         const current = history[stepNumber];
         let status;
         if (isDone) {
@@ -217,22 +164,22 @@ class Caro extends React.Component {
             if (idx === stepNumber) {
                 return (
                     <li key={idx} className="selected-step">
-                        <button type="button" onClick={() => this.jumpTo(idx)}>{desc}</button>
+                        <button type="button" onClick={() => jumpTo(idx)}>{desc}</button>
                     </li>
                 );
             }
             return (
                 <li key={idx}>
-                    <button type="button" onClick={() => this.jumpTo(idx)}>{desc}</button>
+                    <button type="button" onClick={() => jumpTo(idx)}>{desc}</button>
                 </li>
             );
         });
 
-        if (screenWidth < 720) {
-            return (
-                <div className="status">Màn hình cần có chiều dài lớn 720px để có thể chơi được!</div>
-            );
-        }
+        // if (screenWidth < 720) {
+        //     return (
+        //         <div className="status">Màn hình cần có chiều dài lớn 720px để có thể chơi được!</div>
+        //     );
+        // }
 
         return (
             <div className="game">
@@ -247,8 +194,8 @@ class Caro extends React.Component {
                     <ol>
                         <div className="status">{status}</div>
                         <div>
-                            <button type="button" onClick={() => this.resetGame()} id="reset-btn">Chơi lại từ đầu</button>
-                            <br /><button type="button" onClick={() => this.changeListOrder()} id="change-order-btn">Nước đi (col-row)    {this.state.arrowSymbol}</button>
+                            <button type="button" onClick={() => resetGame()} id="reset-btn">Chơi lại từ đầu</button>
+                            <br /><button type="button" onClick={() => changeListOrder()} id="change-order-btn">Nước đi (col-row)    {caroState.arrowSymbol}</button>
                         </div>
                         {moves}
                     </ol>
@@ -258,4 +205,33 @@ class Caro extends React.Component {
     }
 }
 
-export default Caro
+const mapStateToProps = state => {
+    return {
+        caroState: state.caroReducer
+    };
+};
+
+const mapDispatchToProps = dispatch => {
+    return {
+        resetGame: () => {
+            dispatch(actions.resetGame());
+        },
+        changeListOrder: () => {
+            dispatch(actions.changeListOrder());
+        },
+        jumpTo: step => {
+            dispatch(actions.jumpTo(step));
+        },
+        playerMove: (pos, squares) => {
+            dispatch(actions.playerMove(pos, squares));
+        },
+        haveWinner: winLine => {
+            dispatch(actions.haveWinner(winLine))
+        }
+    };
+};
+
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps
+)(Caro);
