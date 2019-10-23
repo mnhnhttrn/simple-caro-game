@@ -3,7 +3,7 @@ import React from 'react'
 import { connect } from 'react-redux'
 import Board from './Board'
 import './Caro.css'
-import * as actions from '../actions'
+import * as actions from '../actions/actions'
 
 
 function getHoriziontalLine(squares, pos) {
@@ -123,7 +123,6 @@ function calculateWinner(squares, pos, xIsNext) {
 }
 
 class Caro extends React.Component {
-
     handleClick(i) {
         const { caroState, playerMove, haveWinner } = this.props
         let { history } = caroState
@@ -175,12 +174,6 @@ class Caro extends React.Component {
             );
         });
 
-        // if (screenWidth < 720) {
-        //     return (
-        //         <div className="status">Màn hình cần có chiều dài lớn 720px để có thể chơi được!</div>
-        //     );
-        // }
-
         return (
             <div className="game">
                 <div className="game-board">
@@ -211,27 +204,7 @@ const mapStateToProps = state => {
     };
 };
 
-const mapDispatchToProps = dispatch => {
-    return {
-        resetGame: () => {
-            dispatch(actions.resetGame());
-        },
-        changeListOrder: () => {
-            dispatch(actions.changeListOrder());
-        },
-        jumpTo: step => {
-            dispatch(actions.jumpTo(step));
-        },
-        playerMove: (pos, squares) => {
-            dispatch(actions.playerMove(pos, squares));
-        },
-        haveWinner: winLine => {
-            dispatch(actions.haveWinner(winLine))
-        }
-    };
-};
-
 export default connect(
     mapStateToProps,
-    mapDispatchToProps
+    { ...actions }
 )(Caro);

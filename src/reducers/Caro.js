@@ -27,6 +27,7 @@ const caroReducer = (state = initialState, actions) => {
             return {
                 ...state,
                 isStepListDesc: !state.isStepListDesc,
+                arrowSymbol: state.isStepListDesc ? '↓' : '↑'
             };
         case types.PLAYER_MOVE:
             return {
