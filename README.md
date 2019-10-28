@@ -1,3 +1,7 @@
+# simple-caro-game-v6
+My weekly assignment in 'Advanced Web Programming' Class
+Week 7
+
 # simple-caro-game-v5
 My weekly assignment in 'Advanced Web Programming' Class  
 Week 5  
