@@ -12,12 +12,19 @@ const initialState = {
 
 const authReducer = (state = initialState, actions) => {
     switch (actions.types) {
-        case types.POST_LOGIN:
+        case types.POST_LOGIN: {
             return {
-                ...state
-            };
-        default:
+                ...state,
+                isFetched: true,
+                isFetching: true,
+            }
+        }
+        case types.POST_LOGIN_FALSE: {
+
+        }
+        default: {
             return state;
+        }
     }
 }
 

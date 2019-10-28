@@ -1,5 +1,5 @@
 import { combineReducers } from 'redux';
-import caroReducer from './Caro';
+import caroReducer from './Game';
 import authReducer from './Auth';
 
 const mainReducer = combineReducers({

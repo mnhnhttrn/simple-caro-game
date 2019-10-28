@@ -1,4 +1,5 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -12,6 +13,8 @@ import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
+
+import * as actions from '../actions/actions'
 
 function Copyright() {
     return (
@@ -51,9 +54,17 @@ const useStyles = makeStyles(theme => ({
     },
 }));
 
-export default function SignIn() {
-    const classes = useStyles();
+function loginFunc(loginPayload, postLoginFunc) {
+    if (loginPayload) {
+        if (loginPayload.Username !== '' && loginPayload.Password !== '') {
+            postLoginFunc(loginPayload)
+        }
+    }
+}
 
+function SignIn(props) {
+    const classes = useStyles();
+    const [login, setLogin] = React.useState({ Username: '', Password: '' })
     return (
         <Container component="main" maxWidth="xs">
             <CssBaseline />
@@ -70,11 +81,12 @@ export default function SignIn() {
                         margin="normal"
                         required
                         fullWidth
-                        id="email"
-                        label="Email Address"
-                        name="email"
-                        autoComplete="email"
+                        id="username"
+                        label="Username"
+                        name="username"
+                        autoComplete="username"
                         autoFocus
+                        onChange={e => { setLogin({ ...login, Username: e.target.value }) }}
                     />
                     <TextField
                         variant="outlined"
@@ -86,17 +98,19 @@ export default function SignIn() {
                         type="password"
                         id="password"
                         autoComplete="current-password"
+                        onChange={e => { setLogin({ ...login, Password: e.target.value }) }}
                     />
                     <FormControlLabel
                         control={<Checkbox value="remember" color="primary" />}
                         label="Remember me"
                     />
                     <Button
-                        type="submit"
+                        type="button"
                         fullWidth
                         variant="contained"
                         color="primary"
                         className={classes.submit}
+                        onClick={loginFunc(login, props.postLogin)}
                     >
                         Sign In
           </Button>
@@ -120,3 +134,10 @@ export default function SignIn() {
         </Container>
     );
 }
+
+
+function mapStateToProps(state) {
+    return { authState: state.authReducer };
+};
+
+export default connect(mapStateToProps, { ...actions })(SignIn)

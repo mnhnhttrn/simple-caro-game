@@ -4,7 +4,7 @@ import {
     Route,
     Redirect
 } from 'react-router-dom';
-import Caro from "../containers/Caro";
+import Game from "../containers/Game";
 import SignIn from "../containers/SignIn"
 import SignUp from "../containers/SignUp"
 
@@ -18,7 +18,7 @@ function Root() {
             </Route>
             <Route exact path="/game" >
                 {
-                    isLog ? <Caro /> : <Redirect to="/sign-in" />
+                    isLog ? <Game /> : <Redirect to="/sign-in" />
                 }
             </Route>
             <Route exact path="/sign-in">
