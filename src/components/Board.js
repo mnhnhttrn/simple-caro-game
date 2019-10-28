@@ -70,7 +70,6 @@ class Board extends React.Component {
     }
 
     render() {
-
         const rows = [];
         for (let i = -1; i < 20; i += 1) {
             rows.push(this.renderRow(i))

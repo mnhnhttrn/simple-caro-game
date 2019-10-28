@@ -1,10 +1,10 @@
 import { combineReducers } from 'redux';
-import caroReducer from './Game';
+import gameReducer from './Game';
 import authReducer from './Auth';
 
 const mainReducer = combineReducers({
     authReducer,
-    caroReducer
+    caroReducer: gameReducer
 });
 
 export default mainReducer;

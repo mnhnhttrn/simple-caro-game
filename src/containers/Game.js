@@ -2,11 +2,11 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import Board from '../components/Board'
-import './Caro.css'
-import * as actions from '../actions/actions'
+import './Game.css'
+import * as actions from '../actions/Game'
 import caroHelper from '../components/caroHelper'
 
-class Caro extends React.Component {
+class Game extends React.Component {
     handleClick(i) {
         const { caroState, playerMove, haveWinner } = this.props
         let { history } = caroState
@@ -91,4 +91,4 @@ const mapStateToProps = state => {
 export default connect(
     mapStateToProps,
     { ...actions }
-)(Caro);
+)(Game);

@@ -13,7 +13,7 @@ const initialState = {
     winLine: Array(5).fill(null)
 }
 
-const caroReducer = (state = initialState, actions) => {
+const gameReducer = (state = initialState, actions) => {
     switch (actions.type) {
         case types.RESET_GAME:
             return initialState;
@@ -47,4 +47,4 @@ const caroReducer = (state = initialState, actions) => {
     }
 }
 
-export default caroReducer;
+export default gameReducer;

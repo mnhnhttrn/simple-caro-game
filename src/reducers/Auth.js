@@ -1,10 +1,6 @@
 import * as types from '../actions/actionTypes'
 
 const initialState = {
-    data: {
-        auth_token: "",
-        username: ""
-    },
     error: "",
     isFetched: false,
     isFetching: false,
@@ -19,8 +15,8 @@ const authReducer = (state = initialState, actions) => {
                 isFetching: true,
             }
         }
-        case types.POST_LOGIN_FALSE: {
-
+        case types.POST_LOGIN_FAILED: {
+            return
         }
         default: {
             return state;

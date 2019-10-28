@@ -8,7 +8,7 @@ import Game from "../containers/Game";
 import SignIn from "../containers/SignIn"
 import SignUp from "../containers/SignUp"
 
-const isLog = true
+const isLog = false
 
 function Root() {
     return (
