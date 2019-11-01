@@ -19,11 +19,10 @@ export const jumpTo = step => dispatch => {
     });
 };
 
-export const playerMove = (pos, squares) => dispatch => {
+export const playerMove = history => (dispatch, getState) => {
     return dispatch({
         type: types.PLAYER_MOVE,
-        pos,
-        squares
+        history
     });
 }
 

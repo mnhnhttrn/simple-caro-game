@@ -1,3 +1,1 @@
-module.export = {
-    REST_API_URL: 'localhost:3333'
-}
+export const REST_API_BASE_URL = 'http://localhost:3333'

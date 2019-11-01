@@ -3,26 +3,42 @@ import React from 'react'
 import { connect } from 'react-redux'
 import { withRouter } from 'react-router-dom'
 import { CssBaseline, Container, Paper, Grid, ListItem, List, ListSubheader, Button, IconButton, Box, Typography, } from '@material-ui/core'
-import ReplayIcon from '@material-ui/icons/Replay';
-import SortIcon from '@material-ui/icons/Sort';
+import { Replay, Sort } from '@material-ui/icons';
 import Board from '../components/Board'
-import * as gameActions from '../actions/Game'
+import * as gameActions from '../actions/SinglePlayer'
 import * as authActions from '../actions/Auth'
 import calculateWinner from '../components/caroHelper'
 import Loading from '../components/Loading';
 
-const handleClick = (i, props) => {
-    const { caroState, playerMove, haveWinner } = props
-    let { history } = caroState
-    const { stepNumber, xIsNext, isDone } = caroState
+const handleTurn = (i, props, playerFirst) => {
+    const { gameState, playerMove, haveWinner } = props
+    let { history } = gameState
+    const { stepNumber, xIsNext, isDone } = gameState
     history = history.slice(0, stepNumber + 1);
     const current = history[history.length - 1];
     const squares = current.squares.slice();
-    if (squares[i] || isDone) {
-        return;
+
+    if (isDone) {
+        return
     }
+
+    //Negative val means bot turn
+    if (i < 0) {
+        i = Math.floor(Math.random() * 400)
+        while (squares[i]) {
+            i = Math.floor(Math.random() * 400)
+        }
+        console.log('bot Moved !!!', i)
+    } else {
+        if (squares[i] || (playerFirst !== xIsNext)) {
+            return;
+        }
+    }
+
     squares[i] = xIsNext ? 'X' : 'O';
-    playerMove(i, squares)
+
+    history = history.concat([{ squares, historyPos: i }])
+    playerMove(history)
     const l = calculateWinner(squares, i, xIsNext)
 
     if (l) {
@@ -30,11 +46,15 @@ const handleClick = (i, props) => {
     }
 }
 
-const Game = props => {
+const SinglePlayer = props => {
     const { resetGame, changeListOrder, jumpTo, authToken } = props
-    const { caroState } = props;
-    const { history, stepNumber, isDone, xIsNext, isStepListDesc, winLine } = caroState;
+    const { gameState } = props;
+    const { history, stepNumber, isDone, xIsNext, isStepListDesc, winLine } = gameState;
+
     const current = history[stepNumber];
+
+    //Player Handler
+    const [playerFirst, setPlayerFirst] = React.useState(false)
 
     //Authenticating
     const [checkAuthing, setCheckAuthing] = React.useState(true)
@@ -86,13 +106,20 @@ const Game = props => {
         );
     });
 
+    //Check for bot moved
+    if (playerFirst !== xIsNext) {
+        console.log('bot move!')
+
+        handleTurn(-1000, props, playerFirst)
+    }
+
     return (
         <Grid container spacing={3}>
             <CssBaseline />
             <Grid item xs={12} lg={8}>
                 <Board
                     squares={current.squares}
-                    onClick={i => handleClick(i, props)}
+                    onClick={i => handleTurn(i, props, playerFirst)}
                     winLine={winLine}
                 />
             </Grid>
@@ -104,9 +131,9 @@ const Game = props => {
                                 <Box display="flex" alignItems="center" justifyContent="space-between">
                                     <Typography color="primary">{status}</Typography>
                                     <IconButton color="secondary" aria-label="Chơi lại từ đầu" onClick={() => resetGame()}>
-                                        <ReplayIcon />
+                                        <Replay />
                                     </IconButton>
-                                    <Button onClick={() => changeListOrder()} color="default" startIcon={<SortIcon />}>
+                                    <Button onClick={() => changeListOrder()} color="default" startIcon={<Sort />}>
                                         {isStepListDesc ? "Giảm dần" : "Tăng dần"}
                                     </Button>
                                 </Box>
@@ -122,11 +149,11 @@ const Game = props => {
 
 const mapStateToProps = state => {
     return {
-        caroState: state.caroReducer
+        gameState: state.gameReducer
     };
 };
 
 export default connect(
     mapStateToProps,
     { ...gameActions, ...authActions }
-)(withRouter(Game));
+)(withRouter(SinglePlayer));

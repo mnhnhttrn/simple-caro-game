@@ -1,10 +1,11 @@
 import React from 'react';
 import {
     Switch,
-    Route
+    Route,
+    Redirect
 } from 'react-router-dom';
 import Home from '../containers/Home';
-import Game from '../containers/Game';
+import SinglePlayer from '../containers/SinglePlayer';
 import SignIn from '../containers/SignIn';
 import SignUp from '../containers/SignUp';
 function Root() {
@@ -13,8 +14,8 @@ function Root() {
             <Route exact path="/">
                 <Home />
             </Route>
-            <Route exact path="/game" >
-                < Game />
+            <Route exact path="/single-player" >
+                < SinglePlayer />
             </Route>
             <Route exact path="/sign-in">
                 <SignIn />
@@ -22,6 +23,7 @@ function Root() {
             <Route exact path="/sign-up">
                 <SignUp />
             </Route>
+            <Redirect to='/' />
         </Switch>
     )
 }

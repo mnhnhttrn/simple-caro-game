@@ -54,7 +54,6 @@ function renderRow(r, props, classes) {
 const useStyles = makeStyles(theme => ({
     board: {
         lineHeight: 1,
-        padding: theme.spacing(5, 2),
         margin: theme.spacing(3, 2)
     },
     row: {

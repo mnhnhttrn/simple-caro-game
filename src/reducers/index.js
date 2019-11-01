@@ -4,7 +4,7 @@ import authReducer from './Auth';
 
 const mainReducer = combineReducers({
     authReducer,
-    caroReducer: gameReducer
+    gameReducer
 });
 
 export default mainReducer;

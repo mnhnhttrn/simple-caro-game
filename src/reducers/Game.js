@@ -13,15 +13,15 @@ const initialState = {
     winLine: Array(5).fill(null)
 }
 
-const gameReducer = (state = initialState, actions) => {
-    switch (actions.type) {
+const gameReducer = (state = initialState, action) => {
+    switch (action.type) {
         case types.RESET_GAME:
             return initialState;
         case types.JUMP_TO:
             return {
                 ...state,
-                stepNumber: actions.step,
-                xIsNext: (actions.step % 2) === 0
+                stepNumber: action.step,
+                xIsNext: (action.step % 2) === 0
             };
         case types.CHANGE_LIST_ORDER:
             return {
@@ -33,14 +33,14 @@ const gameReducer = (state = initialState, actions) => {
             return {
                 ...state,
                 xIsNext: !state.xIsNext,
-                history: state.history.concat([{ squares: actions.squares, historyPos: actions.pos }]),
-                stepNumber: state.history.length
+                history: action.history,
+                stepNumber: action.history.length - 1
             };
         case types.HAVE_WINNER:
             return {
                 ...state,
                 isDone: true,
-                winLine: actions.winLine
+                winLine: action.winLine
             };
         default:
             return state;
