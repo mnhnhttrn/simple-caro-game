@@ -6,6 +6,7 @@ export const PLAYER_MOVE = 'PLAYERMOVE'
 export const HAVE_WINNER = 'HAVE_WINNER'
 
 // Authenticational actions:
-export const POST_LOGIN = 'POST_LOGIN'
-export const POST_LOGIN_SUCCESS = 'LOGIN_SUCCESS'
-export const POST_LOGIN_FAILED = 'LOGIN_FAILED'
+export const AUTH_FETCHING = 'AUTH_FETCHING'
+export const POST_LOGIN_SUCCESS = 'POST_LOGIN_SUCCESS'
+export const POST_LOGIN_FAILED = 'POST_LOGIN_FAILED'
+export const FETCH_AUTH = 'FETCH_AUTH'

@@ -1,25 +1,20 @@
 import React from 'react';
 import {
     Switch,
-    Route,
-    Redirect
+    Route
 } from 'react-router-dom';
-import Game from "../containers/Game";
-import SignIn from "../containers/SignIn"
-import SignUp from "../containers/SignUp"
-
-const isLog = false
-
+import Home from '../containers/Home';
+import Game from '../containers/Game';
+import SignIn from '../containers/SignIn';
+import SignUp from '../containers/SignUp';
 function Root() {
     return (
         <Switch>
             <Route exact path="/">
-                <Redirect to="/game" />
+                <Home />
             </Route>
             <Route exact path="/game" >
-                {
-                    isLog ? <Game /> : <Redirect to="/sign-in" />
-                }
+                < Game />
             </Route>
             <Route exact path="/sign-in">
                 <SignIn />
@@ -30,4 +25,5 @@ function Root() {
         </Switch>
     )
 }
+
 export default Root;

@@ -1,0 +1,15 @@
+.square {
+    background: transparent;
+    border-left: none;
+    border-top: none;
+    border-right: dashed 1px grey;
+    border-bottom: dashed 1px grey;
+    width: 32px;
+    float: left;
+    line-height: 32px;
+    height: 32px;
+    text-align: center;
+}
+.square:hover{
+    background: #d0d0d0
+}
