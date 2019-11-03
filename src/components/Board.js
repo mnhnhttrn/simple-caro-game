@@ -1,5 +1,5 @@
 import React from 'react'
-import { Paper, makeStyles, Container } from '@material-ui/core'
+import { Paper, makeStyles, Container, Box } from '@material-ui/core'
 
 import './Board.css'
 
@@ -53,13 +53,13 @@ function renderRow(r, props, classes) {
 
 const useStyles = makeStyles(theme => ({
     board: {
+        minWidth: 760,
+        minHeight: 760,
+        padding: theme.spacing(5, 2),
         lineHeight: 1,
-        margin: theme.spacing(3, 2)
     },
     row: {
         display: 'inline-block',
-        padding: 0,
-        lineHeight: 1,
     }
 }));
 
@@ -70,8 +70,9 @@ export default function Board(props) {
         rows.push(renderRow(i, props, classes))
     }
     return (
-        <Container align="center">
-            <Paper className={classes.board}>{rows}</Paper>
+        <Container>
+            <Paper className={classes.board} align="center">{rows}</Paper>
         </Container>
     );
 }
+

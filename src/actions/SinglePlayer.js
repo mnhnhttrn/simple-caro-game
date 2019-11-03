@@ -12,10 +12,15 @@ export const changeListOrder = () => dispatch => {
     });
 };
 
-export const jumpTo = step => dispatch => {
+export const jumpTo = (step, history) => dispatch => {
+    let isDone = false
+    if (step === history.length - 1) {
+        isDone = true
+    }
     return dispatch({
         type: types.JUMP_TO,
-        step
+        step,
+        isDone
     });
 };
 

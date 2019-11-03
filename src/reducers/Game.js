@@ -8,8 +8,7 @@ const initialState = {
     xIsNext: true,
     isDone: false,
     stepNumber: 0,
-    isStepListDesc: false,
-    arrowSymbol: '↓',
+    isStepListDesc: true,
     winLine: Array(5).fill(null)
 }
 
@@ -21,13 +20,13 @@ const gameReducer = (state = initialState, action) => {
             return {
                 ...state,
                 stepNumber: action.step,
+                isDone: action.isDone,
                 xIsNext: (action.step % 2) === 0
             };
         case types.CHANGE_LIST_ORDER:
             return {
                 ...state,
-                isStepListDesc: !state.isStepListDesc,
-                arrowSymbol: state.isStepListDesc ? '↓' : '↑'
+                isStepListDesc: !state.isStepListDesc
             };
         case types.PLAYER_MOVE:
             return {

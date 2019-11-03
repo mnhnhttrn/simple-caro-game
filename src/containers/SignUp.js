@@ -1,10 +1,12 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { makeStyles, Paper, Box, Typography, Link, TextField, Container, CssBaseline, Button, IconButton } from '@material-ui/core'
+import { makeStyles, Paper, Box, Typography, Link, TextField, Container, CssBaseline, Button, IconButton, Snackbar } from '@material-ui/core'
 import { withRouter } from 'react-router-dom'
 import * as actions from '../actions/Auth'
+import * as types from '../actions/actionTypes'
 import Loading from '../components/Loading'
 import { ArrowBack } from '@material-ui/icons'
+import CustomSnackBar from '../components/CustomSnackBar'
 
 const useStyles = makeStyles(theme => ({
     container: {
@@ -15,8 +17,7 @@ const useStyles = makeStyles(theme => ({
     },
     paper: {
         width: '100%',
-        height: '80%',
-        padding: theme.spacing(3)
+        padding: theme.spacing(3, 5)
     },
     item: {
         margin: theme.spacing(2)
@@ -24,9 +25,9 @@ const useStyles = makeStyles(theme => ({
 }))
 
 const SignUp = props => {
-    const { postLogin, authState, authToken } = props
-    const [signupPayload, setSignupPayload] = React.useState({ Username: '', Password: '', ConfirmPassword: '' })
-    const { isAuthFetching } = authState
+    const { postSignup, authState, authToken } = props
+    const [signupPayload, setSignupPayload] = React.useState({ username: '', password: '', confirmPassword: '', avatarURL: '' })
+    const { isAuthFetching, error } = authState
 
     const classes = useStyles()
 
@@ -66,7 +67,6 @@ const SignUp = props => {
                     </Typography>
                     <TextField
                         className={classes.item}
-                        variant="outlined"
                         margin="normal"
                         required
                         fullWidth
@@ -75,10 +75,9 @@ const SignUp = props => {
                         name="username"
                         autoFocus
                         disabled={isAuthFetching}
-                        onChange={event => { setSignupPayload({ ...signupPayload, Username: event.target.value }) }} />
+                        onChange={event => { setSignupPayload({ ...signupPayload, username: event.target.value }) }} />
                     <TextField
                         className={classes.item}
-                        variant="outlined"
                         margin="normal"
                         required
                         fullWidth
@@ -88,10 +87,9 @@ const SignUp = props => {
                         id="password"
                         autoComplete="current-password"
                         disabled={isAuthFetching}
-                        onChange={event => { setSignupPayload({ ...signupPayload, Password: event.target.value }) }} />
+                        onChange={event => { setSignupPayload({ ...signupPayload, password: event.target.value }) }} />
                     <TextField
                         className={classes.item}
-                        variant="outlined"
                         margin="normal"
                         required
                         fullWidth
@@ -100,22 +98,22 @@ const SignUp = props => {
                         type="password"
                         id="confirm-password"
                         disabled={isAuthFetching}
-                        error={signupPayload.Password !== signupPayload.ConfirmPassword}
-                        helperText={signupPayload.Password !== signupPayload.ConfirmPassword ? "Hai mật khẩu chưa khớp" : false}
-                        onChange={event => { setSignupPayload({ ...signupPayload, ConfirmPassword: event.target.value }) }} />
+                        error={signupPayload.password !== signupPayload.confirmPassword}
+                        helperText={signupPayload.password !== signupPayload.confirmPassword ? "Hai mật khẩu chưa khớp" : false}
+                        onChange={event => { setSignupPayload({ ...signupPayload, confirmPassword: event.target.value }) }} />
                     <Button
                         className={classes.item}
                         variant="contained"
                         color="primary"
                         onClick={() => {
-                            // postLogin(loginPayload).then(res => {
-                            //     if (res.type = "POST_LOGIN_SUCCESS") {
-                            //         props.history.push('/')
-                            //     }
-                            // })
+                            signupPayload.username && signupPayload.password && postSignup(signupPayload).then(res => {
+                                if (res.type === types.POST_LOGIN_SUCCESS) {
+                                    props.history.push('/')
+                                }
+                            })
                         }}
                         disabled={isAuthFetching}>
-                        đăng nhập
+                        đăng ký
                     </Button>
                     <Link
                         className={classes.item}
@@ -125,6 +123,18 @@ const SignUp = props => {
                     </Link>
                 </Box>
             </Paper>
+            <Snackbar
+                anchorOrigin={{
+                    vertical: 'top',
+                    horizontal: 'center',
+                }}
+                open={error !== ""}
+                autoHideDuration={6000}>
+                <CustomSnackBar
+                    variant="error"
+                    message={error}
+                />
+            </Snackbar>
         </Container >
     )
 }

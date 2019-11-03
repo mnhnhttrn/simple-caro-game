@@ -1,13 +1,10 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { makeStyles, Paper, Box, Typography, Link, TextField, Container, CssBaseline, Button, Avatar, CardMedia, Snackbar } from '@material-ui/core'
+import { makeStyles, Paper, Box, Typography, Link, TextField, Container, CssBaseline, Button, IconButton } from '@material-ui/core'
 import { withRouter } from 'react-router-dom'
 import * as actions from '../actions/Auth'
 import Loading from '../components/Loading'
-import CustomSnackBar from '../components/CustomSnackBar'
-
-import logoImg from '../static/logo.png'
-import * as types from '../actions/actionTypes'
+import { ArrowBack } from '@material-ui/icons'
 
 const useStyles = makeStyles(theme => ({
     container: {
@@ -22,17 +19,14 @@ const useStyles = makeStyles(theme => ({
     },
     item: {
         margin: theme.spacing(2)
-    },
-    logo: {
-        width: 60,
-        height: 60
     }
 }))
 
-const SignIn = props => {
+const Profile = props => {
     const { postLogin, authState, authToken } = props
-    let [loginPayload, setLoginPayload] = React.useState({ username: '', password: '' })
-    const { isAuthFetching, error } = authState
+    const [signupPayload, setSignupPayload] = React.useState({ Username: '', Password: '', ConfirmPassword: '' })
+    const { isAuthFetching, profilePayload } = authState
+    const { username, avatarURL } = profilePayload
 
     const classes = useStyles()
 
@@ -40,12 +34,12 @@ const SignIn = props => {
     const [checkAuthing, setCheckAuthing] = React.useState(true)
     React.useEffect(() => {
         authToken().then(res => {
-            if (res) {
-                props.history.push('/')
+            if (!res) {
+                props.history.push('/sign-in')
             } else {
                 setCheckAuthing(false)
             }
-        });
+        })
     }, [])
 
     if (checkAuthing) {
@@ -56,16 +50,19 @@ const SignIn = props => {
         <Container maxWidth="xs" className={classes.container} component="main">
             <CssBaseline />
             <Paper className={classes.paper}>
+                <IconButton href="/" aria-label="Quay lại trang chủ">
+                    <ArrowBack />
+                </IconButton>
                 <Box
                     display="flex"
                     flexDirection="column"
                     justifyContent="center"
                     alignItems="center">
-                    <Avatar className={classes.logo} src={logoImg} />
                     <Typography
                         className={classes.item}
+                        component="h1"
                         variant="h5">
-                        Đăng nhập
+                        Thông tin tài khoản
                     </Typography>
                     <TextField
                         className={classes.item}
@@ -77,29 +74,17 @@ const SignIn = props => {
                         name="username"
                         autoFocus
                         disabled={isAuthFetching}
-                        onChange={event => { setLoginPayload({ ...loginPayload, username: event.target.value }) }} />
-                    <TextField
-                        className={classes.item}
-                        margin="normal"
-                        required
-                        fullWidth
-                        name="password"
-                        label="Mật khẩu"
-                        type="password"
-                        id="password"
-                        autoComplete="current-password"
-                        disabled={isAuthFetching}
-                        onChange={event => { setLoginPayload({ ...loginPayload, password: event.target.value }) }} />
+                        onChange={event => { profilePayload({ ...profilePayload, Username: event.target.value }) }} />
                     <Button
                         className={classes.item}
                         variant="contained"
                         color="primary"
                         onClick={() => {
-                            loginPayload.username && loginPayload.password && postLogin(loginPayload).then(res => {
-                                if (res.type === types.POST_LOGIN_SUCCESS) {
-                                    props.history.push('/')
-                                }
-                            })
+                            // postLogin(loginPayload).then(res => {
+                            //     if (res.type = "POST_LOGIN_SUCCESS") {
+                            //         props.history.push('/')
+                            //     }
+                            // })
                         }}
                         disabled={isAuthFetching}>
                         đăng nhập
@@ -112,18 +97,6 @@ const SignIn = props => {
                     </Link>
                 </Box>
             </Paper>
-            <Snackbar
-                anchorOrigin={{
-                    vertical: 'top',
-                    horizontal: 'center',
-                }}
-                open={error !== ""}
-                autoHideDuration={6000}>
-                <CustomSnackBar
-                    variant="error"
-                    message={error}
-                />
-            </Snackbar>
         </Container >
     )
 }
@@ -137,4 +110,4 @@ const mapStateToProps = state => {
 export default connect(
     mapStateToProps,
     { ...actions }
-)(withRouter(SignIn));
+)(withRouter(Profile));

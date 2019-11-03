@@ -1,6 +1,10 @@
 import * as types from '../actions/actionTypes'
 
 const initialState = {
+    profilePayload: {
+        username: "user",
+        avatarURL: ""
+    },
     error: "",
     isAuthFetched: false,
     isAuthFetching: false
@@ -19,7 +23,9 @@ const authReducer = (state = initialState, action) => {
             return {
                 ...state,
                 isAuthFetched: true,
-                isAuthFetching: false
+                isAuthFetching: false,
+                profilePayload: {},
+                error: ""
             }
         }
         case types.POST_LOGIN_FAILED: {
@@ -27,6 +33,7 @@ const authReducer = (state = initialState, action) => {
                 ...state,
                 isAuthFetched: true,
                 isAuthFetching: false,
+                profilePayload: {},
                 error: action.error
             }
         }
@@ -34,7 +41,9 @@ const authReducer = (state = initialState, action) => {
             return {
                 ...state,
                 isAuthFetched: true,
-                isAuthFetching: false
+                isAuthFetching: false,
+                error: action.error,
+                profilePayload: action.profilePayload
             }
         }
         default: {
