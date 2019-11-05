@@ -24,7 +24,7 @@ const authReducer = (state = initialState, action) => {
                 ...state,
                 isAuthFetched: true,
                 isAuthFetching: false,
-                profilePayload: {},
+                profilePayload: action.profilePayload,
                 error: ""
             }
         }
@@ -44,6 +44,11 @@ const authReducer = (state = initialState, action) => {
                 isAuthFetching: false,
                 error: action.error,
                 profilePayload: action.profilePayload
+            }
+        }
+        case types.RESET_AUTH: {
+            return {
+                state: initialState
             }
         }
         default: {

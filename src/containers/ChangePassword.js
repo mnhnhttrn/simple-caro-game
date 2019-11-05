@@ -7,6 +7,7 @@ import Loading from '../components/Loading'
 import { ArrowBack, Publish } from '@material-ui/icons'
 import AvatarImg from '../components/AvatarImg'
 import CustomSnackBar from '../components/CustomSnackBar'
+import * as types from '../actions/actionTypes'
 
 const useStyles = makeStyles(theme => ({
     container: {
@@ -51,11 +52,11 @@ const useStyles = makeStyles(theme => ({
     }
 }))
 
-const Profile = props => {
-    const { postUpdateProfile, authState, authToken, updateAvatar } = props
+const ChangePassword = props => {
+    const { postChangePassword, authState, authToken, updateAvatar } = props
     const { isAuthFetching, profilePayload, error } = authState
     const { username, avatarURL } = profilePayload
-    const [updateProfilePayload, setUpdateProfilePayload] = React.useState({ username: '' })
+    const [changePasswordPayload, setChangePasswordPayload] = React.useState({ oldPassword: '', newPassword: '', confirmNewPassword: '' })
 
     let avatarInputRef = React.useRef(null)
 
@@ -67,7 +68,6 @@ const Profile = props => {
         authToken().then(res => {
             if (!res) {
                 props.history.push('/sign-in')
-                setUpdateProfilePayload({ ...updateProfilePayload, username: username })
             } else {
                 setCheckAuthing(false)
             }
@@ -96,45 +96,54 @@ const Profile = props => {
                         variant="h5">
                         Thông tin tài khoản
                     </Typography>
-                    <input id="avatarInput" type="file" ref={avatarInputRef} accept="image/x-png,image/jpeg" onChange={e => { updateAvatar(e.target.files[0]).then(() => { window.location.reload() }) }} style={{ display: 'none' }} />
-                    <ButtonBase className={classes.avatarWrapper} onClick={() => { avatarInputRef.current.click() }}>
-                        <Publish className={classes.avatarAbove} />
-                        <Avatar className={classes.avatar} src={AvatarImg(avatarURL)} imgProps={{ onError: (e) => { e.target.src = AvatarImg() } }} />
-                    </ButtonBase>
                     <TextField
                         className={classes.item}
                         margin="normal"
                         required
                         fullWidth
-                        id="username"
-                        label="Tên đăng nhập"
-                        name="username"
+                        id="old-password"
+                        label="Mật khẩu cũ"
+                        name="old-password"
                         autoFocus
                         disabled={isAuthFetching}
-                        defaultValue={username}
-                        onChange={event => { setUpdateProfilePayload({ ...updateProfilePayload, username: event.target.value }) }} />
-                    <Button
+                        type="password"
+                        onChange={event => { setChangePasswordPayload({ ...changePasswordPayload, oldPassword: event.target.value }) }} />
+                    <TextField
                         className={classes.item}
-                        variant="contained"
-                        color="primary"
-                        onClick={() => {
-                            postUpdateProfile(updateProfilePayload).then(res => {
-                                if (res.type = "POST_LOGIN_SUCCESS") {
-                                    window.location.reload()
-                                }
-                            })
-                        }}
-                        disabled={isAuthFetching || updateProfilePayload.username === "" || updateProfilePayload.username === username}>
-                        cập nhật tài khoản
-                    </Button>
+                        margin="normal"
+                        required
+                        fullWidth
+                        id="new-password"
+                        label="Mật khẩu mới"
+                        name="new-password"
+                        disabled={isAuthFetching}
+                        type="password"
+                        onChange={event => { setChangePasswordPayload({ ...changePasswordPayload, newPassword: event.target.value }) }} />
+                    <TextField
+                        className={classes.item}
+                        margin="normal"
+                        required
+                        fullWidth
+                        name="confirm-password"
+                        label="Xác nhận mật khẩu"
+                        type="password"
+                        id="confirm-password"
+                        disabled={isAuthFetching}
+                        error={changePasswordPayload.newPassword !== changePasswordPayload.confirmNewPassword}
+                        helperText={changePasswordPayload.newPassword !== changePasswordPayload.confirmNewPassword ? "Hai mật khẩu chưa khớp" : false}
+                        onChange={event => { setChangePasswordPayload({ ...changePasswordPayload, confirmNewPassword: event.target.value }) }} />
                     <Button
                         className={classes.item}
                         variant="contained"
                         color="secondary"
                         onClick={() => {
-                            props.history.push('/profile/change-password')
+                            postChangePassword(changePasswordPayload).then(res => {
+                                if (res.type === types.POST_LOGIN_SUCCESS) {
+                                    props.history.push('/profile')
+                                }
+                            })
                         }}
-                        disabled={isAuthFetching}>
+                        disabled={isAuthFetching || changePasswordPayload.oldPassword === '' || changePasswordPayload.newPassword === '' || changePasswordPayload.newPassword !== changePasswordPayload.confirmNewPassword}>
                         cập nhật password
                     </Button>
                 </Box>
@@ -164,4 +173,4 @@ const mapStateToProps = state => {
 export default connect(
     mapStateToProps,
     { ...actions }
-)(withRouter(Profile));
+)(withRouter(ChangePassword));

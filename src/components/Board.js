@@ -4,19 +4,53 @@ import { Paper, makeStyles, Container, Box } from '@material-ui/core'
 import './Board.css'
 
 function Square(props) {
-    const { onClick, value } = props
+    const { onClick, value, highlight } = props
+    let val = value
+    let cl = ''
+    let squareClassName = 'square'
+    if (value === 'X') {
+        val = ''
+        if (highlight) {
+            cl = "fa fa-lg fa-times"
+            squareClassName += ' MuiButton-containedPrimary'
+        } else {
+            cl = "fa fa-lg fa-times MuiIcon-colorPrimary"
+        }
+    }
+    if (value === 'O') {
+        val = ''
+        if (highlight) {
+            cl = "fa fa-lg fa-dot-circle"
+            squareClassName += ' MuiButton-containedSecondary'
+        } else {
+            cl = "fa fa-lg fa-dot-circle MuiIcon-colorSecondary"
+        }
+    }
+
     return (
-        <div className="square" onClick={onClick}>
-            {value}
+        <div className={squareClassName} onClick={onClick}>
+            <div className={cl}>{val}</div>
         </div>
     );
 }
 
 function renderSquare(i, props) {
     const { winLine, squares, onClick, pos } = props
+    console.log('current pos ', pos)
     if (winLine.indexOf(i) > -1) {
         return (
             <Square
+                highlight={true}
+                key={i}
+                value={squares[i] ? squares[i] : " "}
+                onClick={() => onClick(i)}
+            />
+        );
+    }
+    if (i === pos) {
+        return (
+            <Square
+                highlight={true}
                 key={i}
                 value={squares[i] ? squares[i] : " "}
                 onClick={() => onClick(i)}
@@ -38,7 +72,7 @@ function renderRow(r, props, classes) {
         if (r === -1) {
             squares.push(<Square key={j} value={j} />)
         } else {
-            squares.push(renderSquare(r * 20 + j, props, classes))
+            squares.push(renderSquare(r * 20 + j, props))
         }
     }
     if (r === -1) {

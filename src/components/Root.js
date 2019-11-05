@@ -9,7 +9,7 @@ import SinglePlayer from '../containers/SinglePlayer';
 import SignIn from '../containers/SignIn';
 import SignUp from '../containers/SignUp';
 import Profile from '../containers/Profile';
-import Loading from './Loading';
+import ChangePassword from '../containers/ChangePassword'
 function Root() {
     return (
         <Switch>
@@ -28,12 +28,11 @@ function Root() {
             <Route exact path="/profile">
                 <Profile />
             </Route>
-            <Route exact path="/loading">
-                <Loading></Loading>
+            <Route exact path="/profile/change-password">
+                <ChangePassword />
             </Route>
             <Redirect to='/' />
-
-        </Switch>
+        </Switch >
     )
 }
 

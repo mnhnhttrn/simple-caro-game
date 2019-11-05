@@ -129,7 +129,7 @@ const SignUp = props => {
                     horizontal: 'center',
                 }}
                 open={error !== ""}
-                autoHideDuration={6000}>
+                autoHideDuration={3333}>
                 <CustomSnackBar
                     variant="error"
                     message={error}

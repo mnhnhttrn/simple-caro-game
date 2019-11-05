@@ -117,8 +117,8 @@ const SignIn = props => {
                     vertical: 'top',
                     horizontal: 'center',
                 }}
-                open={error !== ""}
-                autoHideDuration={6000}>
+                open={error !== "" && error}
+                autoHideDuration={3333}>
                 <CustomSnackBar
                     variant="error"
                     message={error}

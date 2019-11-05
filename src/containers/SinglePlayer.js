@@ -2,14 +2,18 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { withRouter } from 'react-router-dom'
-import { makeStyles, CssBaseline, Container, Paper, Grid, ListItem, List, ListSubheader, Button, IconButton, Box as div, Typography } from '@material-ui/core'
+import { makeStyles, CssBaseline, Container, Paper, Grid, ListItem, List, ListSubheader, Button, IconButton, Typography, Card, Icon, Avatar, ListItemAvatar, ListItemText, Dialog, DialogTitle } from '@material-ui/core'
 import { Replay, Sort, ArrowBackIos, AccountCircle, Undo, Redo } from '@material-ui/icons';
+import { loadCSS } from 'fg-loadcss';
 import Board from '../components/Board'
 import * as gameActions from '../actions/SinglePlayer'
 import * as authActions from '../actions/Auth'
 import calculateWinner from '../components/caroHelper'
 import Loading from '../components/Loading';
-
+import AvatarImg from '../components/AvatarImg'
+import BotAvatar from '../static/bot_avatar.png'
+import ProfileMenu from '../components/ProfileMenu'
+import WhoFirstDialog from '../components/dialogs/WhoFirstDialog'
 const useStyle = makeStyles(theme => ({
     headerBar: {
         minWidth: 910,
@@ -21,20 +25,30 @@ const useStyle = makeStyles(theme => ({
     headerBtn: {
         margin: theme.spacing(1)
     },
-    headerStatus: {
-        fontWeight: 'bold'
-    },
     item: {
         display: 'flex',
         justifyContent: 'center',
         margin: theme.spacing(3)
     },
+    statusBar: {
+        width: '100%',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: theme.spacing(2, 3)
+    },
     historyListContainer: {
         padding: theme.spacing(5)
     },
     historyList: {
-        maxHeight: '75vh',
+        maxHeight: '55vh',
         overflow: 'auto',
+    },
+    backgroundPrimary: {
+        background: theme.palette.primary.main
+    },
+    backgroundSecondary: {
+        background: theme.palette.secondary.main
     },
 }))
 
@@ -83,16 +97,21 @@ const allowRedo = (history, stepNumber) => {
 
 const SinglePlayer = props => {
     const { resetGame, changeListOrder, jumpTo, authToken } = props
-    const { gameState } = props;
+    const { gameState, authState } = props;
     const { history, stepNumber, isDone, xIsNext, isStepListDesc, winLine } = gameState;
+    const { profilePayload } = authState
+    const { avatarURL } = profilePayload
+    //const avatarURL = ""
 
     const current = history[stepNumber];
 
-    //Player Handler
-    const [playerFirst, setPlayerFirst] = React.useState(false)
-
     //Authenticating
-    const [checkAuthing, setCheckAuthing] = React.useState(true)
+    let [checkAuthing, setCheckAuthing] = React.useState(true)
+
+    //Player Handler
+    let [playerFirst, setPlayerFirst] = React.useState(true)
+    //Player Select Handler
+    let [whoFirstAsked, setWhoFirstAsked] = React.useState(false)
 
     const styleClasses = useStyle()
 
@@ -104,6 +123,10 @@ const SinglePlayer = props => {
                 setCheckAuthing(false)
             }
         })
+        loadCSS(
+            'https://use.fontawesome.com/releases/v5.1.0/css/all.css',
+            document.querySelector('#font-awesome-css'),
+        );
     }, [])
 
     if (checkAuthing) {
@@ -111,13 +134,23 @@ const SinglePlayer = props => {
     }
 
 
+    function handleCloseWhoFirstDialog(value) {
+        console.log('called!!!')
+        setWhoFirstAsked(true);
+        setPlayerFirst(value);
+    }
+
+    if (!whoFirstAsked) {
+        return <WhoFirstDialog onClose={handleCloseWhoFirstDialog} open={!whoFirstAsked} />
+    }
+
     let status;
     if (isDone) {
         // const winner = !xIsNext ? 'X' : 'O';
         // status = `${winner} CHIẾN THẮNG!!!`;
         status = `Bạn đã ${(!xIsNext) === playerFirst ? 'chiến thắng ^_^' : 'thua cuộc T_T'}`
     } else {
-        status = `Đến lượt ${xIsNext === playerFirst ? 'bạn' : 'máy'} ${xIsNext ? 'X' : 'O'}...`;
+        status = `Đến lượt ${xIsNext === playerFirst ? 'bạn' : 'máy'}...`;
     }
 
     const moves = (isStepListDesc ? history.slice(1).reverse() : history.slice(1)).map((step, move, arr) => {
@@ -125,19 +158,15 @@ const SinglePlayer = props => {
         if (isStepListDesc) {
             idx = arr.length - move
         }
-        const desc = `#${idx.toString().padEnd(10)}(${step.historyPos % 20}-${Math.floor(step.historyPos / 20)})`;
-
-        //Highlight style for current step
-        if (isStepListDesc && idx === 1) {
-            return (<ListItem key={idx} button onClick={() => jumpTo(idx, history)}>{desc}</ListItem>)
-        }
-
-        if (!isStepListDesc && idx === history.length - 1) {
-            return (<ListItem key={idx} button onClick={() => jumpTo(idx, history)}>{desc}</ListItem>)
-        }
-
         return (
-            <ListItem key={idx} button divider onClick={() => jumpTo(idx, history)}>{desc}</ListItem>
+            <ListItem key={idx} button onClick={() => jumpTo(idx, history)}>
+                <ListItemAvatar>
+                    <Avatar className={idx % 2 === 0 ? styleClasses.backgroundSecondary : styleClasses.backgroundPrimary}>
+                        #{idx}
+                    </Avatar>
+                </ListItemAvatar>
+                <ListItemText primary={`${Math.floor(step.historyPos / 20)} - ${step.historyPos % 20}`} secondary={`${(idx % 2 === 0) === playerFirst ? 'Máy' : 'Bạn'} đã đánh`} />
+            </ListItem>
         );
     });
 
@@ -156,9 +185,9 @@ const SinglePlayer = props => {
                     <IconButton color="default" aria-label="Quay về trang chủ" href="/" className={styleClasses.headerBtn}>
                         <ArrowBackIos />
                     </IconButton>
-                    <Typography className={styleClasses.headerStatus} color={xIsNext ? "primary" : "secondary"}>{status}</Typography>
+                    <Typography variant="h5">Chơi với máy</Typography>
                     <div>
-                        <IconButton color="secondary" aria-label="Chơi lại từ đầu" onClick={() => resetGame()} className={styleClasses.headerBtn}>
+                        <IconButton color="secondary" aria-label="Chơi lại từ đầu" onClick={() => { resetGame(); setWhoFirstAsked(false) }} className={styleClasses.headerBtn}>
                             <Replay />
                         </IconButton>
                         <IconButton color="primary" aria-label="Quay lại một bước" disabled={!allowUndo(history, stepNumber)} onClick={() => allowUndo(history, stepNumber) && jumpTo(stepNumber - 1, history)} className={styleClasses.headerBtn}>
@@ -168,9 +197,7 @@ const SinglePlayer = props => {
                             <Redo />
                         </IconButton>
                     </div>
-                    <IconButton color="default" aria-label="Tài khoản" onClick={() => resetGame()} className={styleClasses.headerBtn}>
-                        <AccountCircle />
-                    </IconButton>
+                    <ProfileMenu className={styleClasses.headerBtn} avatarURL={avatarURL} />
                 </Paper>
             </Grid>
             <Grid item xs={12} lg={8}>
@@ -179,10 +206,23 @@ const SinglePlayer = props => {
                     <Board
                         squares={current.squares}
                         onClick={i => handleTurn(i, props, playerFirst)}
-                        winLine={winLine} />
+                        winLine={winLine}
+                        pos={current.historyPos}
+                    />
                 </div>
             </Grid>
             <Grid item xs={12} lg={4}>
+                <Paper className={styleClasses.item}>
+                    <div className={styleClasses.statusBar}>
+                        <Icon className={xIsNext ? "fa fa-3x fa-times-circle" : "fa fa-3x fa-dot-circle"} color={xIsNext ? "primary" : "secondary"} />
+                        <Typography>{status}</Typography>
+                        {
+                            xIsNext === playerFirst
+                                ? <Avatar src={AvatarImg(avatarURL)} imgProps={{ onError: (e) => { e.target.src = AvatarImg() } }} />
+                                : <Avatar src={BotAvatar}></Avatar>
+                        }
+                    </div>
+                </Paper>
                 <Paper className={styleClasses.item}>
                     <Container className={styleClasses.historyListContainer}>
                         <ListSubheader>
@@ -202,7 +242,8 @@ const SinglePlayer = props => {
 
 const mapStateToProps = state => {
     return {
-        gameState: state.gameReducer
+        gameState: state.gameReducer,
+        authState: state.authReducer
     };
 };
 

@@ -1,15 +1,18 @@
 .square {
     background: transparent;
+    margin-top:-2px;
     border-left: none;
     border-top: none;
     border-right: dashed 1px grey;
     border-bottom: dashed 1px grey;
     width: 32px;
     float: left;
-    line-height: 32px;
     height: 32px;
-    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
+
 .square:hover{
     background: #d0d0d0
 }

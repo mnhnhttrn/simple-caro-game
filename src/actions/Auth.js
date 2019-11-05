@@ -26,6 +26,7 @@ export const authToken = () => async (dispatch, getState) => {
             },
             baseURL: REST_API_BASE_URL
         }).then(response => {
+            console.log('authToken() profile payload resp: ', response.data.profilePayload)
             dispatch({
                 type: types.FETCH_AUTH,
                 profilePayload: response.data.profilePayload
@@ -65,6 +66,7 @@ export const postLogin = loginPayload => dispatch => {
         Cookie.set(ACCESS_TOKEN_COOKIE_KEY, response.data.token)
         return (dispatch({
             type: types.POST_LOGIN_SUCCESS,
+            profilePayload: {}
         }))
     }).catch(error => {
         let errorMsg = ""
@@ -92,6 +94,7 @@ export const postSignup = signupPayload => dispatch => {
         Cookie.set(ACCESS_TOKEN_COOKIE_KEY, response.data.token)
         return (dispatch({
             type: types.POST_LOGIN_SUCCESS,
+            profilePayload: {}
         }))
     }).catch(error => {
         let errorMsg = ""
@@ -109,3 +112,93 @@ export const postSignup = signupPayload => dispatch => {
         }))
     })
 };
+
+export const signout = () => dispatch => {
+    if (Cookie.get(ACCESS_TOKEN_COOKIE_KEY)) {
+        Cookie.remove(ACCESS_TOKEN_COOKIE_KEY)
+    }
+    return (dispatch({
+        type: types.RESET_AUTH
+    }))
+}
+
+export const updateAvatar = file => dispatch => {
+    const url = '/upload-avatar'
+    dispatch({ type: types.AUTH_FETCHING })
+    let data = new FormData();
+    data.append('avatar', file);
+    let accessToken = 'Bearer ' + Cookie.get(ACCESS_TOKEN_COOKIE_KEY)
+    return axios.post(url, data, {
+        headers: {
+            Authorization: accessToken
+        },
+        baseURL: REST_API_BASE_URL
+    }).then(response => {
+        return (dispatch({
+            type: types.POST_LOGIN_SUCCESS,
+            profilePayload: response.data.profilePayload
+        }))
+    }).catch(error => {
+        let errorMsg = ""
+        if (!error.response) {
+            errorMsg = 'Lỗi kết nối mạng!';
+        }
+        return (dispatch({
+            type: types.POST_LOGIN_FAILED,
+            error: errorMsg
+        }))
+    })
+}
+
+export const postUpdateProfile = updateProfilePayload => dispatch => {
+    const url = '/profile'
+    dispatch({ type: types.AUTH_FETCHING })
+    let accessToken = 'Bearer ' + Cookie.get(ACCESS_TOKEN_COOKIE_KEY)
+    return axios.post(url, updateProfilePayload, {
+        headers: {
+            Authorization: accessToken
+        },
+        baseURL: REST_API_BASE_URL
+    }).then(response => {
+        return (dispatch({
+            type: types.POST_LOGIN_SUCCESS,
+            profilePayload: {}
+        }))
+    }).catch(error => {
+        let errorMsg = ""
+        if (!error.response) {
+            errorMsg = 'Lỗi kết nối mạng!';
+        }
+        return (dispatch({
+            type: types.POST_LOGIN_FAILED,
+            error: errorMsg
+        }))
+    })
+}
+
+
+export const postChangePassword = changePasswordPayload => dispatch => {
+    const url = '/profile/change-password'
+    dispatch({ type: types.AUTH_FETCHING })
+    let accessToken = 'Bearer ' + Cookie.get(ACCESS_TOKEN_COOKIE_KEY)
+    return axios.post(url, changePasswordPayload, {
+        headers: {
+            Authorization: accessToken
+        },
+        baseURL: REST_API_BASE_URL
+    }).then(response => {
+        return (dispatch({
+            type: types.POST_LOGIN_SUCCESS,
+            profilePayload: {}
+        }))
+    }).catch(error => {
+        let errorMsg = ""
+        if (!error.response) {
+            errorMsg = 'Lỗi kết nối mạng!';
+        }
+        return (dispatch({
+            type: types.POST_LOGIN_FAILED,
+            error: errorMsg
+        }))
+    })
+}
